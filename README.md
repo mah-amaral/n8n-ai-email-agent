@@ -29,7 +29,7 @@ O agente é responsável por:
 
 ## 1) Arquitetura da Solução
 
-![Workflow](docs/workflow.png)
+![Workflow](docs/workflow-ai-email-agent.png)
 
 ### Componentes principais
 
