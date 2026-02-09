@@ -1,0 +1,309 @@
+{
+  "name": "Projeto-RotulaçãoEmails",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -432,
+        -144
+      ],
+      "id": "aa4f357a-e8cb-4dd7-9f40-10b79690e2b0",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "vcZeoiU0qcLn8mnV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Remetente:{{ $json.from.value[0].address }}\nTítulo:{{ $json.subject }}\nCorpo do Email:{{ $json.text }}",
+        "options": {
+          "systemMessage": "# RESUMO\nVocê é um Agente de Email capaz de processar os e-mails recebidos para adicionar etiquetas e criar um rascunho de resposta.\n\n## FERRAMENTAS\n- Buscar Etiquetas: Use primeiro para identificar quais etiquetas existem no Gmail.\n- Adicionar Etiqueta: Use para categorizar o e-mail como Agendamentos, Financeiro, Ofertas ou Pessoal.\n- Criar Rascunho: Use para redigir um rascunho com uma resposta profissional.\n- Criar Evento: Use para criar um evento no meu calendário\n\n## INSTRUÇÕES DE EXECUÇÃO\n1. Classificação: Primeiro, use Buscar Etiquetas. Depois, aplique a etiqueta mais adequada usando o seu ID (Agendamentos, Financeiro, Ofertas ou Pessoal) usando a ferramenta Adicionar Etiqueta.\n2. Rascunho: Independente da categoria, use a ferramenta Criar Rascunho para preparar uma resposta educada e profissional representando Matheus Amaral. Sempre escreva os email em formados em HTML.\n3. Evento: Caso esse e-mail tenha sido classificado como \"Agendamentos\", você deve sempre criar um evento para mim no calendário com essa reunião."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -80,
+        -144
+      ],
+      "id": "ef10325c-d29c-4b45-80e9-7be882dee723",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        32
+      ],
+      "id": "d7f31a97-f289-416f-a2c7-a87ff81d0424",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "5IoIwhCyb3MV4qCM",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.from.value[0].address }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -112,
+        32
+      ],
+      "id": "4ac1f3ca-fad0-4511-bf4d-fa2f61195dd5",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Label_Names_or_IDs', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        112
+      ],
+      "id": "d9408ecd-ddc6-4e5b-8843-0fc13aafda47",
+      "name": "Adicionar Etiqueta",
+      "webhookId": "c627843c-529d-4abc-9748-1c1e8e7c00ed",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "vcZeoiU0qcLn8mnV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        112
+      ],
+      "id": "748612d2-83e6-480f-bf08-4f23285c21ff",
+      "name": "Buscar Etiquetas",
+      "webhookId": "f9abf185-f8ae-492e-b8af-5e1ba8a5135c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "vcZeoiU0qcLn8mnV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        1680,
+        112
+      ],
+      "id": "ca7c6560-ad8c-4a22-897f-8cb8a17e8900",
+      "name": "Enviar Mensagem",
+      "webhookId": "3fb7f392-1fe1-4b06-9771-f71d1cfe537e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "vcZeoiU0qcLn8mnV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "html",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "threadId": "={{ $json.threadId }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        112
+      ],
+      "id": "e2d5a18e-e5ed-4a91-b718-169a68228746",
+      "name": "Criar Rascunho",
+      "webhookId": "28e477f5-8296-419f-b30a-abf4f5a3a7f3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "vcZeoiU0qcLn8mnV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "mah.amaral.silva97@gmail.com",
+          "mode": "list",
+          "cachedResultName": "mah.amaral.silva97@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        144,
+        112
+      ],
+      "id": "5cb2a12e-0c25-4455-8ee0-7e64b85e65d2",
+      "name": "Criar evento",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2F4t2WvjpsloxqOu",
+          "name": "Google Calendar account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Adicionar Etiqueta": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Etiquetas": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Mensagem": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "Criar Rascunho": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar evento": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "dea3147b-48f5-49bc-847d-7b4569745ab5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a430ae842637196e80fa44ca09445131d7ea5165ccf508fbbdd704059d905fd1"
+  },
+  "id": "F3MetuS58HOf5czmNS5UT",
+  "tags": []
+}
