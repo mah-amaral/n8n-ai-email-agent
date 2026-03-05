@@ -1,4 +1,4 @@
-# Case de Portfólio — AI Email Agent com n8n
+# AI Email Agent com n8n
 
 ## 🎯 Contexto do Problema
 
